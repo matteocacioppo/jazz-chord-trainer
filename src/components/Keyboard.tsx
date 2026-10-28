@@ -1,3 +1,5 @@
+import { useT } from '../i18n';
+
 export interface KeyMark {
   fill?: string;
   dot?: string;
@@ -16,6 +18,7 @@ const isBlack = (m: number) => [1, 3, 6, 8, 10].includes(m % 12);
 const WW = 24, WH = 132, BW = 15, BH = 84;
 
 export function Keyboard({ from = 36, to = 96, marks = {}, onKeyDown }: Props) {
+  const { t } = useT();
   const whites: { m: number; x: number }[] = [];
   const blacks: { m: number; x: number }[] = [];
   let wi = 0;
@@ -55,7 +58,7 @@ export function Keyboard({ from = 36, to = 96, marks = {}, onKeyDown }: Props) {
 
   return (
     <div className="keyboard-wrap">
-      <svg className="keyboard" viewBox={`0 0 ${width} ${WH + 1}`} role="img" aria-label="Tastiera">
+      <svg className="keyboard" viewBox={`0 0 ${width} ${WH + 1}`} role="img" aria-label={t('aria.keyboard')}>
         {whites.map((k) => key(k.m, k.x, false))}
         {blacks.map((k) => key(k.m, k.x, true))}
       </svg>

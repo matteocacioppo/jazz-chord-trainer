@@ -1,11 +1,12 @@
+import type { Localized } from '../i18n';
 import { chordTones, type Chord, type ChordTone } from './chords';
 import { mod, writtenOctave } from './notes';
 
 export type VoicingStyle = 'shell' | 'stacked';
 
-export const VOICING_LABELS: Record<VoicingStyle, string> = {
-  shell: 'Basso + mano destra',
-  stacked: 'Terze sovrapposte',
+export const VOICING_LABELS: Record<VoicingStyle, Localized> = {
+  shell: { en: 'Bass + right hand', it: 'Basso + mano destra' },
+  stacked: { en: 'Stacked thirds', it: 'Terze sovrapposte' },
 };
 
 export interface VoicedNote extends ChordTone {

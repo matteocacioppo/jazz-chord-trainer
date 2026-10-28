@@ -1,9 +1,13 @@
-import { CATEGORIES } from '../theory/chords';
-import { EMPTY_STATS, type Stats } from '../settings';
+import { useT, type Lang } from '../i18n';
+import { CATEGORIES, findType } from '../theory/chords';
+import { EMPTY_STATS, type StatEntry, type Stats } from '../settings';
 
-const categoryLabel = (id: string) => CATEGORIES.find((c) => c.id === id)?.label ?? id;
+const categoryLabel = (id: string, lang: Lang) => CATEGORIES.find((c) => c.id === id)?.label[lang] ?? id;
+const entryName = (id: string, e: StatEntry, lang: Lang) =>
+  findType(id)?.name[lang] ?? (typeof e.name === 'string' ? e.name : e.name[lang]);
 
 export function StatsPage({ stats, setStats }: { stats: Stats; setStats: (s: Stats) => void }) {
+  const { lang, t } = useT();
   const rows = Object.entries(stats.types)
     .map(([id, e]) => ({ id, ...e, acc: e.correct / e.attempts }))
     .sort((a, b) => a.acc - b.acc || b.attempts - a.attempts);
@@ -14,43 +18,43 @@ export function StatsPage({ stats, setStats }: { stats: Stats; setStats: (s: Sta
   return (
     <div className="stats-page">
       <div className="card session wide">
-        <div className="stat"><span>{total}</span><small>accordi provati</small></div>
-        <div className="stat"><span>{total ? Math.round((correct / total) * 100) : 0}%</span><small>al primo colpo</small></div>
-        <div className="stat"><span>{correct ? (totalMs / correct / 1000).toFixed(1) : '–'} s</span><small>tempo medio</small></div>
-        <div className="stat"><span>{stats.bestStreak}</span><small>serie record</small></div>
+        <div className="stat"><span>{total}</span><small>{t('stats.tried')}</small></div>
+        <div className="stat"><span>{total ? Math.round((correct / total) * 100) : 0}%</span><small>{t('stats.firstTry')}</small></div>
+        <div className="stat"><span>{correct ? (totalMs / correct / 1000).toFixed(1) : '–'} s</span><small>{t('stats.avgTime')}</small></div>
+        <div className="stat"><span>{stats.bestStreak}</span><small>{t('stats.bestStreak')}</small></div>
       </div>
 
       <div className="card">
         <div className="card-head">
-          <h3>Per tipo di accordo <span className="muted">· i più difficili in alto</span></h3>
+          <h3>{t('stats.byType')} <span className="muted">{t('stats.hardestFirst')}</span></h3>
           <button
             className="btn ghost"
             disabled={!total}
-            onClick={() => confirm('Azzerare tutte le statistiche?') && setStats(EMPTY_STATS)}
+            onClick={() => confirm(t('stats.resetConfirm')) && setStats(EMPTY_STATS)}
           >
-            Azzera
+            {t('stats.reset')}
           </button>
         </div>
         {rows.length === 0 ? (
-          <p className="muted">Ancora nessun dato: fai qualche giro nel Quiz.</p>
+          <p className="muted">{t('stats.empty')}</p>
         ) : (
           <table className="stats-table">
             <thead>
               <tr>
-                <th>Accordo</th>
-                <th>Categoria</th>
-                <th>Tentativi</th>
-                <th>Precisione</th>
-                <th>Tempo medio</th>
+                <th>{t('stats.colChord')}</th>
+                <th>{t('stats.colCategory')}</th>
+                <th>{t('stats.colAttempts')}</th>
+                <th>{t('stats.colAccuracy')}</th>
+                <th>{t('stats.colAvgTime')}</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
                   <td>
-                    <b className="mono">{r.label}</b> <span className="muted small">{r.name}</span>
+                    <b className="mono">{r.label}</b> <span className="muted small">{entryName(r.id, r, lang)}</span>
                   </td>
-                  <td className="muted">{categoryLabel(r.category)}</td>
+                  <td className="muted">{categoryLabel(r.category, lang)}</td>
                   <td>{r.attempts}</td>
                   <td>
                     <div className="bar">

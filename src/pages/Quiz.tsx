@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { playChord } from '../audio/piano';
-import { Legend, ToneChips, voicingMarks } from '../components/ChordParts';
+import { ChordSubtitle, Legend, ToneChips, voicingMarks } from '../components/ChordParts';
 import { Keyboard, type KeyMark } from '../components/Keyboard';
 import { Staff } from '../components/Staff';
+import { useT, type I18nKey } from '../i18n';
 import type { MidiState } from '../midi/useMidi';
 import { generateChord } from '../quiz';
 import type { PromptMode, QuizSettings, Settings, Stats } from '../settings';
@@ -26,6 +27,7 @@ type Outcome = 'pending' | 'correct' | 'wrong';
 export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote }: Props) {
   const q = settings.quiz;
   const { italian } = settings;
+  const { lang, t } = useT();
   const [round, setRound] = useState<{ chord: Chord; started: number }>(() => ({
     chord: generateChord(q, stats),
     started: Date.now(),
@@ -57,7 +59,7 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
     setSession((s) => ({ total: s.total + 1, correct: s.correct + (ok ? 1 : 0), streak: ok ? s.streak + 1 : 0 }));
     setStats((s) => {
       const e = s.types[type.id] ?? {
-        label: type.suffix || 'maggiore',
+        label: type.suffix || 'maj',
         name: type.name,
         category: type.category,
         attempts: 0,
@@ -175,10 +177,10 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
             {showSymbol && (
               <div className="prompt-symbol">
                 <div className="symbol xl">{chordSymbol(round.chord, italian)}</div>
-                <div className="subtitle">
-                  {round.chord.type.name}
-                  {!italian && <span className="muted"> · {chordSymbol(round.chord, true)}</span>}
-                </div>
+                <ChordSubtitle
+                  name={round.chord.type.name[lang]}
+                  solfege={lang === 'it' && !italian ? chordSymbol(round.chord, true) : undefined}
+                />
               </div>
             )}
             {showStaff && (
@@ -205,11 +207,11 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
               <>
                 {selection.length > 0 && (
                   <button className="btn primary" onClick={() => evaluate(selection, true)}>
-                    ✓ Verifica selezione
+                    {t('quiz.verify')}
                   </button>
                 )}
                 <button className="btn primary" onClick={reveal}>
-                  Rivela <kbd>Invio</kbd>
+                  {t('quiz.reveal')} <kbd>{t('quiz.kbdEnter')}</kbd>
                 </button>
               </>
             ) : (
@@ -217,24 +219,24 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
                 {outcome === 'pending' && (
                   <>
                     <button className="btn ok" onClick={() => record(true)}>
-                      L'ho suonato giusto
+                      {t('quiz.selfRight')}
                     </button>
                     <button className="btn bad" onClick={() => record(false)}>
-                      Sbagliato
+                      {t('quiz.selfWrong')}
                     </button>
                   </>
                 )}
                 <button className="btn primary" onClick={next}>
-                  Prossimo <kbd>Invio</kbd>
+                  {t('quiz.next')} <kbd>{t('quiz.kbdEnter')}</kbd>
                 </button>
               </>
             )}
             <button className="btn" onClick={listen}>
-              ▶ Ascolta <kbd>A</kbd>
+              {t('quiz.listen')} <kbd>A</kbd>
             </button>
             {phase === 'asking' && (
               <button className="btn ghost" onClick={next}>
-                Salta
+                {t('quiz.skip')}
               </button>
             )}
           </div>
@@ -246,9 +248,7 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
             <Legend />
           ) : (
             <p className="muted small center">
-              {midiReady
-                ? 'Suona l’accordo sulla tastiera MIDI: la verifica è automatica.'
-                : 'Senza MIDI: clicca i tasti per selezionare le note e premi “Verifica”, oppure suona al piano e premi “Rivela”.'}
+              {t(midiReady ? 'quiz.hintMidi' : 'quiz.hintNoMidi')}
             </p>
           )}
         </div>
@@ -258,15 +258,15 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
         <div className="card session">
           <div className="stat">
             <span>{session.correct}/{session.total}</span>
-            <small>corretti</small>
+            <small>{t('quiz.statCorrect')}</small>
           </div>
           <div className="stat">
             <span>{accuracy}%</span>
-            <small>precisione</small>
+            <small>{t('quiz.statAccuracy')}</small>
           </div>
           <div className="stat">
             <span>{session.streak}</span>
-            <small>serie (record {stats.bestStreak})</small>
+            <small>{t('quiz.statStreak', { n: stats.bestStreak })}</small>
           </div>
         </div>
 
@@ -287,30 +287,31 @@ function Status(props: {
   midiReady: boolean;
 }) {
   const { phase, feedback, elapsed, hint, onHint, italian, midiReady } = props;
-  if (phase === 'correct') return <div className="status ok">✓ Corretto! <span className="muted">{(elapsed / 1000).toFixed(1)} s</span></div>;
+  const { t } = useT();
+  if (phase === 'correct') return <div className="status ok">{t('quiz.correct')} <span className="muted">{(elapsed / 1000).toFixed(1)} s</span></div>;
   if (feedback && !feedback.correct) {
     const n = feedback.missing.length;
     return (
       <div className="status bad">
-        ✗ Non ancora.
-        {n > 0 && <span> {n === 1 ? 'Manca 1 nota' : `Mancano ${n} note`}{hint && `: ${feedback.missing.map((t) => t.label).join(', ')}`}.</span>}
-        {feedback.extras.length > 0 && <span> Note estranee: {feedback.extras.map((pc) => noteName(spellPc(pc), italian)).join(', ')}.</span>}
+        {t('quiz.notYet')}
+        {n > 0 && <span> {n === 1 ? t('quiz.missing1') : t('quiz.missingN', { n })}{hint && `: ${feedback.missing.map((tone) => tone.label).join(', ')}`}.</span>}
+        {feedback.extras.length > 0 && <span> {t('quiz.extras')} {feedback.extras.map((pc) => noteName(spellPc(pc), italian)).join(', ')}.</span>}
         {n > 0 && !hint && (
           <button className="link" onClick={onHint}>
-            quali gradi?
+            {t('quiz.whichDegrees')}
           </button>
         )}
       </div>
     );
   }
-  if (phase === 'revealed') return <div className="status">Ecco la soluzione.</div>;
-  return <div className="status muted">{midiReady ? 'In ascolto sul MIDI…' : 'Suonalo al piano!'}</div>;
+  if (phase === 'revealed') return <div className="status">{t('quiz.solution')}</div>;
+  return <div className="status muted">{t(midiReady ? 'quiz.listening' : 'quiz.playIt')}</div>;
 }
 
-const PROMPTS: { id: PromptMode; label: string }[] = [
-  { id: 'symbol', label: 'Sigla' },
-  { id: 'staff', label: 'Spartito' },
-  { id: 'both', label: 'Entrambi' },
+const PROMPTS: { id: PromptMode; label: I18nKey }[] = [
+  { id: 'symbol', label: 'settings.symbol' },
+  { id: 'staff', label: 'settings.staff' },
+  { id: 'both', label: 'settings.both' },
 ];
 
 const WHITE_ROOTS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
@@ -323,6 +324,7 @@ function QuizSettingsPanel(props: {
   setVoicing: (v: VoicingStyle) => void;
 }) {
   const { q, update, italian, voicing, setVoicing } = props;
+  const { lang, t } = useT();
   const toggle = <T,>(list: T[], item: T) => {
     const next = list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
     return next.length ? next : list; // almeno un elemento selezionato
@@ -330,23 +332,23 @@ function QuizSettingsPanel(props: {
 
   return (
     <div className="card settings">
-      <h3>Impostazioni quiz</h3>
+      <h3>{t('settings.title')}</h3>
 
-      <label className="field-label">Categorie</label>
+      <label className="field-label">{t('settings.categories')}</label>
       <div className="chip-toggles">
         {CATEGORIES.map((c) => (
           <button key={c.id} className={`pill${q.categories.includes(c.id) ? ' active' : ''}`}
             onClick={() => update({ categories: toggle(q.categories, c.id) })}>
-            {c.label}
+            {c.label[lang]}
           </button>
         ))}
       </div>
 
       <label className="field-label">
-        Fondamentali
+        {t('settings.roots')}
         <span className="quick">
-          <button className="link" onClick={() => update({ roots: ROOTS.map(noteKey) })}>tutte</button>
-          <button className="link" onClick={() => update({ roots: WHITE_ROOTS })}>solo naturali</button>
+          <button className="link" onClick={() => update({ roots: ROOTS.map(noteKey) })}>{t('settings.all')}</button>
+          <button className="link" onClick={() => update({ roots: WHITE_ROOTS })}>{t('settings.naturals')}</button>
         </span>
       </label>
       <div className="chip-toggles roots">
@@ -358,30 +360,30 @@ function QuizSettingsPanel(props: {
         ))}
       </div>
 
-      <label className="field-label">Mostra</label>
+      <label className="field-label">{t('settings.show')}</label>
       <div className="segmented">
         {PROMPTS.map((p) => (
           <button key={p.id} className={q.prompt === p.id ? 'active' : ''} onClick={() => update({ prompt: p.id })}>
-            {p.label}
+            {t(p.label)}
           </button>
         ))}
       </div>
 
-      <label className="field-label">Voicing della soluzione</label>
+      <label className="field-label">{t('settings.voicing')}</label>
       <div className="segmented">
         {(Object.keys(VOICING_LABELS) as VoicingStyle[]).map((v) => (
           <button key={v} className={voicing === v ? 'active' : ''} onClick={() => setVoicing(v)}>
-            {VOICING_LABELS[v]}
+            {VOICING_LABELS[v][lang]}
           </button>
         ))}
       </div>
 
       <Switch checked={q.rootOptional} onChange={(v) => update({ rootOptional: v })}
-        label="Fondamentale opzionale" hint="Accetta voicing rootless" />
+        label={t('settings.rootOptional')} hint={t('settings.rootOptionalHint')} />
       <Switch checked={q.autoAdvance} onChange={(v) => update({ autoAdvance: v })}
-        label="Avanza da solo" hint="Dopo una risposta corretta" />
+        label={t('settings.autoAdvance')} hint={t('settings.autoAdvanceHint')} />
       <Switch checked={q.smart} onChange={(v) => update({ smart: v })}
-        label="Ripasso intelligente" hint="Ripropone più spesso gli accordi che sbagli" />
+        label={t('settings.smart')} hint={t('settings.smartHint')} />
     </div>
   );
 }

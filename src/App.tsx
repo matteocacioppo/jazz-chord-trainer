@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { loadPiano, noteOff, noteOn, unlockAudio, usePianoStatus } from './audio/piano';
+import { LanguageMenu } from './components/LanguageMenu';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { LangContext, useT, type I18nKey } from './i18n';
 import { useMidi, type MidiState } from './midi/useMidi';
 import { Explore } from './pages/Explore';
 import { Quiz, Switch } from './pages/Quiz';
@@ -9,15 +11,29 @@ import { DEFAULT_SETTINGS, EMPTY_STATS, type Settings, type Stats } from './sett
 
 type Page = 'explore' | 'quiz' | 'stats';
 
-const PAGES: { id: Page; label: string }[] = [
-  { id: 'explore', label: 'Esplora' },
-  { id: 'quiz', label: 'Quiz' },
-  { id: 'stats', label: 'Statistiche' },
+const PAGES: { id: Page; label: I18nKey }[] = [
+  { id: 'explore', label: 'nav.explore' },
+  { id: 'quiz', label: 'nav.quiz' },
+  { id: 'stats', label: 'nav.stats' },
 ];
 
 export default function App() {
-  const [page, setPage] = useLocalStorage<Page>('jct.page', 'explore');
   const [settings, setSettings] = useLocalStorage<Settings>('jct.settings', DEFAULT_SETTINGS);
+
+  useEffect(() => {
+    document.documentElement.lang = settings.lang;
+  }, [settings.lang]);
+
+  return (
+    <LangContext.Provider value={settings.lang}>
+      <Shell settings={settings} setSettings={setSettings} />
+    </LangContext.Provider>
+  );
+}
+
+function Shell({ settings, setSettings }: { settings: Settings; setSettings: (fn: (s: Settings) => Settings) => void }) {
+  const { t } = useT();
+  const [page, setPage] = useLocalStorage<Page>('jct.page', 'explore');
   const [stats, setStats] = useLocalStorage<Stats>('jct.stats', EMPTY_STATS);
   const pianoStatus = usePianoStatus();
 
@@ -57,17 +73,18 @@ export default function App() {
         <nav className="tabs">
           {PAGES.map((p) => (
             <button key={p.id} className={page === p.id ? 'active' : ''} onClick={() => setPage(p.id)}>
-              {p.label}
+              {t(p.label)}
             </button>
           ))}
         </nav>
         <div className="top-right">
-          <Switch checked={settings.italian} onChange={(v) => setSettings((s) => ({ ...s, italian: v }))} label="Do Re Mi" />
-          <Switch checked={settings.midiEcho} onChange={(v) => setSettings((s) => ({ ...s, midiEcho: v }))} label="Suono MIDI" />
+          <Switch checked={settings.italian} onChange={(v) => setSettings((s) => ({ ...s, italian: v }))} label={t('top.solfege')} />
+          <Switch checked={settings.midiEcho} onChange={(v) => setSettings((s) => ({ ...s, midiEcho: v }))} label={t('top.midiSound')} />
           <MidiPill midi={midi} />
           <span className={`pill status-pill ${pianoStatus}`}>
-            {{ idle: 'Audio', loading: 'Carico piano…', ready: 'Piano pronto', error: 'Audio non disponibile' }[pianoStatus]}
+            {t(`audio.${pianoStatus}`)}
           </span>
+          <LanguageMenu onChange={(lang) => setSettings((s) => ({ ...s, lang }))} />
         </div>
       </header>
 
@@ -84,10 +101,11 @@ export default function App() {
 
 function MidiPill({ midi }: { midi: MidiState }) {
   const { status, inputs } = midi;
-  if (status === 'unsupported') return <span className="pill status-pill error" title="Usa Chrome o Edge">MIDI non supportato</span>;
-  if (status === 'denied') return <span className="pill status-pill error">MIDI bloccato</span>;
-  if (status === 'pending') return <span className="pill status-pill loading">MIDI…</span>;
-  if (!inputs.length) return <span className="pill status-pill idle">Nessun MIDI</span>;
+  const { t } = useT();
+  if (status === 'unsupported') return <span className="pill status-pill error" title={t('midi.unsupportedHint')}>{t('midi.unsupported')}</span>;
+  if (status === 'denied') return <span className="pill status-pill error">{t('midi.denied')}</span>;
+  if (status === 'pending') return <span className="pill status-pill loading">{t('midi.pending')}</span>;
+  if (!inputs.length) return <span className="pill status-pill idle">{t('midi.none')}</span>;
   return (
     <span className="pill status-pill ready" title={inputs.join(', ')}>
       {inputs[0]}

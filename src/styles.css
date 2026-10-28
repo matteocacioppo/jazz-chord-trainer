@@ -305,3 +305,41 @@ button.pill:hover { border-color: var(--border-strong); }
 .bar { position: relative; height: 22px; width: 160px; background: var(--bg-2); border-radius: 6px; overflow: hidden; }
 .bar i { position: absolute; inset: 0 auto 0 0; opacity: 0.55; border-radius: 6px; }
 .bar span { position: relative; font-size: 12px; font-weight: 600; line-height: 22px; padding-left: 8px; }
+
+/* ---------- language menu ---------- */
+
+.lang-menu { position: relative; }
+.lang-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--card-2);
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 13px; font-weight: 600;
+  transition: border-color 0.15s;
+}
+.lang-btn:hover, .lang-btn[aria-expanded='true'] { border-color: var(--border-strong); }
+.flag { width: 20px; height: 14px; border-radius: 3px; flex: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15); }
+.chevron { width: 10px; height: 6px; color: var(--muted); transition: transform 0.15s; }
+.lang-btn[aria-expanded='true'] .chevron { transform: rotate(180deg); }
+.lang-list {
+  position: absolute; right: 0; top: calc(100% + 6px); z-index: 20;
+  list-style: none; margin: 0; padding: 5px;
+  min-width: 160px;
+  background: var(--card-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  animation: drop 0.12s ease;
+}
+@keyframes drop { from { opacity: 0; transform: translateY(-4px); } }
+.lang-list button {
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  border: 0; background: transparent;
+  padding: 8px 10px; border-radius: 8px;
+  font-size: 14px; text-align: left;
+}
+.lang-list button:hover { background: rgba(255, 255, 255, 0.06); }
+.lang-list button.active { color: #fff; }
+.lang-list .check { margin-left: auto; color: var(--accent-2); }

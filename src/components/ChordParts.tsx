@@ -1,3 +1,4 @@
+import { useT } from '../i18n';
 import type { ChordTone } from '../theory/chords';
 import { ROLE_LABELS, type Role } from '../theory/intervals';
 import { noteName } from '../theory/notes';
@@ -13,17 +14,18 @@ export function voicingMarks(voicing: VoicedNote[], italian: boolean): Record<nu
 }
 
 export function ToneChips({ tones, italian }: { tones: ChordTone[]; italian: boolean }) {
+  const { t } = useT();
   return (
     <div className="chips">
-      {tones.map((t) => (
+      {tones.map((tone) => (
         <span
-          key={t.iv}
-          className={`chip${t.optional ? ' optional' : ''}`}
-          style={{ '--c': roleColor(t.role) } as React.CSSProperties}
-          title={t.optional ? 'Nota opzionale nel voicing' : undefined}
+          key={tone.iv}
+          className={`chip${tone.optional ? ' optional' : ''}`}
+          style={{ '--c': roleColor(tone.role) } as React.CSSProperties}
+          title={tone.optional ? t('chip.optional') : undefined}
         >
-          <b>{t.label}</b>
-          <span>{noteName(t.note, italian)}</span>
+          <b>{tone.label}</b>
+          <span>{noteName(tone.note, italian)}</span>
         </span>
       ))}
     </div>
@@ -31,15 +33,26 @@ export function ToneChips({ tones, italian }: { tones: ChordTone[]; italian: boo
 }
 
 export function Legend() {
+  const { lang, t } = useT();
   return (
     <div className="legend">
       {(Object.keys(ROLE_LABELS) as Role[]).map((r) => (
         <span key={r}>
           <i style={{ background: roleColor(r) }} />
-          {ROLE_LABELS[r]}
+          {ROLE_LABELS[r][lang]}
         </span>
       ))}
-      <span className="muted">Bordo tratteggiato = nota opzionale</span>
+      <span className="muted">{t('legend.optional')}</span>
+    </div>
+  );
+}
+
+/** Sottotitolo: nome dell'accordo e, nell'interfaccia italiana, la sigla in Do Re Mi. */
+export function ChordSubtitle({ name, solfege }: { name: string; solfege?: string }) {
+  return (
+    <div className="subtitle">
+      {name}
+      {solfege && <span className="muted"> · {solfege}</span>}
     </div>
   );
 }

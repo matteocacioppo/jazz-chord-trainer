@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Accidental, Formatter, Renderer, Stave, StaveConnector, StaveNote, Voice } from 'vexflow';
+import { useT } from '../i18n';
 import { LETTERS } from '../theory/notes';
 import type { VoicedNote } from '../theory/voicing';
 
@@ -21,6 +22,7 @@ function makeVoice(notes: VoicedNote[], clef: 'treble' | 'bass') {
 /** Grande rigo (chiave di violino + basso) con l'accordo come semibreve. */
 export function Staff({ notes }: { notes: VoicedNote[] }) {
   const ref = useRef<HTMLDivElement>(null);
+  const { t } = useT();
 
   useEffect(() => {
     const el = ref.current;
@@ -62,5 +64,5 @@ export function Staff({ notes }: { notes: VoicedNote[] }) {
     svg?.removeAttribute('height');
   }, [notes]);
 
-  return <div className="staff" ref={ref} aria-label="Spartito" />;
+  return <div className="staff" ref={ref} aria-label={t('aria.staff')} />;
 }

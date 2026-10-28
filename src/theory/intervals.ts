@@ -1,3 +1,5 @@
+import type { Localized } from '../i18n';
+
 export type IntervalName =
   | '1' | 'b9' | '9' | '#9' | '2' | 'b3' | '3' | '4' | '11' | '#11'
   | 'b5' | '5' | '#5' | 'b13' | '6' | '13' | 'bb7' | 'b7' | '7';
@@ -44,9 +46,9 @@ export function intervalRole(iv: IntervalName): Role {
 
 export const intervalLabel = (iv: IntervalName) => iv.replace(/b/g, '♭').replace(/#/g, '♯');
 
-export const ROLE_LABELS: Record<Role, string> = {
-  root: 'Fondamentale',
-  guide: 'Note guida (3ª / 7ª)',
-  fifth: 'Quinta',
-  tension: 'Tensioni',
+export const ROLE_LABELS: Record<Role, Localized> = {
+  root: { en: 'Root', it: 'Fondamentale' },
+  guide: { en: 'Guide tones (3rd / 7th)', it: 'Note guida (3ª / 7ª)' },
+  fifth: { en: 'Fifth', it: 'Quinta' },
+  tension: { en: 'Tensions', it: 'Tensioni' },
 };

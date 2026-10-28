@@ -1,3 +1,4 @@
+import type { Lang, Localized } from './i18n';
 import type { CategoryId } from './theory/chords';
 import { noteKey, ROOTS } from './theory/notes';
 import type { VoicingStyle } from './theory/voicing';
@@ -14,6 +15,7 @@ export interface QuizSettings {
 }
 
 export interface Settings {
+  lang: Lang;
   italian: boolean;
   voicing: VoicingStyle;
   midiEcho: boolean;
@@ -21,6 +23,7 @@ export interface Settings {
 }
 
 export const DEFAULT_SETTINGS: Settings = {
+  lang: 'en',
   italian: false,
   voicing: 'shell',
   midiEcho: false,
@@ -36,7 +39,8 @@ export const DEFAULT_SETTINGS: Settings = {
 
 export interface StatEntry {
   label: string;
-  name: string;
+  /** Stringa semplice nei dati salvati prima dell'aggiunta delle lingue. */
+  name: Localized | string;
   category: CategoryId;
   attempts: number;
   correct: number;

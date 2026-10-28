@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { playChord } from '../audio/piano';
-import { Legend, ToneChips, voicingMarks } from '../components/ChordParts';
+import { ChordSubtitle, Legend, ToneChips, voicingMarks } from '../components/ChordParts';
 import { Keyboard, type KeyMark } from '../components/Keyboard';
 import { Staff } from '../components/Staff';
+import { useT } from '../i18n';
 import { recognize } from '../theory/check';
 import { CATEGORIES, CHORD_TYPES, chordSymbol, chordTones, findType, type CategoryId } from '../theory/chords';
 import { midiName, mod, noteKey, noteName, parseNote, ROOTS } from '../theory/notes';
@@ -19,6 +20,7 @@ const EXPLORE_CATEGORIES = CATEGORIES.filter((c) => c.id !== 'miste');
 
 export function Explore({ settings, midiActive, onPlayNote }: Props) {
   const { italian, voicing: style } = settings;
+  const { lang, t } = useT();
   const [rootKey, setRootKey] = useState('C');
   const [typeId, setTypeId] = useState('maj7');
   const [category, setCategory] = useState<CategoryId>('settime');
@@ -37,7 +39,7 @@ export function Explore({ settings, midiActive, onPlayNote }: Props) {
   return (
     <div className="explore">
       <aside className="card picker">
-        <h3>Fondamentale</h3>
+        <h3>{t('explore.root')}</h3>
         <div className="root-grid">
           {ROOTS.map((r) => (
             <button key={noteKey(r)} className={`pill${noteKey(r) === rootKey ? ' active' : ''}`} onClick={() => setRootKey(noteKey(r))}>
@@ -46,19 +48,19 @@ export function Explore({ settings, midiActive, onPlayNote }: Props) {
           ))}
         </div>
 
-        <h3>Tipo di accordo</h3>
+        <h3>{t('explore.type')}</h3>
         <div className="tabs small">
           {EXPLORE_CATEGORIES.map((c) => (
             <button key={c.id} className={c.id === category ? 'active' : ''} onClick={() => setCategory(c.id)}>
-              {c.label}
+              {c.label[lang]}
             </button>
           ))}
         </div>
         <div className="type-grid">
-          {CHORD_TYPES.filter((t) => t.category === category).map((t) => (
-            <button key={t.id} className={`type-btn${t.id === typeId ? ' active' : ''}`} onClick={() => setTypeId(t.id)}>
-              <b>{noteName(chord.root, italian) + t.suffix}</b>
-              <span>{t.name}</span>
+          {CHORD_TYPES.filter((type) => type.category === category).map((type) => (
+            <button key={type.id} className={`type-btn${type.id === typeId ? ' active' : ''}`} onClick={() => setTypeId(type.id)}>
+              <b>{noteName(chord.root, italian) + type.suffix}</b>
+              <span>{type.name[lang]}</span>
             </button>
           ))}
         </div>
@@ -69,17 +71,14 @@ export function Explore({ settings, midiActive, onPlayNote }: Props) {
           <div className="hero-head">
             <div>
               <div className="symbol">{chordSymbol(chord, italian)}</div>
-              <div className="subtitle">
-                {chord.type.name}
-                {!italian && <span className="muted"> · {chordSymbol(chord, true)}</span>}
-              </div>
+              <ChordSubtitle name={chord.type.name[lang]} solfege={lang === 'it' && !italian ? chordSymbol(chord, true) : undefined} />
             </div>
             <div className="actions">
               <button className="btn primary" onClick={() => playChord(voicing.map((n) => n.midi))}>
-                ▶ Accordo
+                {t('explore.playChord')}
               </button>
               <button className="btn" onClick={() => playChord(voicing.map((n) => n.midi), 'arp')}>
-                ♪ Arpeggio
+                {t('explore.arpeggio')}
               </button>
             </div>
           </div>
@@ -93,21 +92,21 @@ export function Explore({ settings, midiActive, onPlayNote }: Props) {
             <Staff notes={voicing} />
           </div>
           <div className="card midi-card">
-            <h3>Cosa stai suonando</h3>
+            <h3>{t('explore.playing')}</h3>
             {midiActive.length === 0 ? (
-              <p className="muted">Suona qualcosa sulla tastiera MIDI: qui vedrai le note e l'accordo riconosciuto.</p>
+              <p className="muted">{t('explore.playHint')}</p>
             ) : (
               <>
                 <p className="played-notes">{midiActive.map((m) => midiName(m, italian)).join('  ')}</p>
                 {recognized.length === 0 ? (
-                  <p className="muted">Nessun accordo riconosciuto.</p>
+                  <p className="muted">{t('explore.noMatch')}</p>
                 ) : (
                   <div className="recognized">
                     {recognized.map((r, i) => (
                       <button
                         key={r.symbol + r.rootless}
                         className={`pill${i === 0 ? ' active' : ''}`}
-                        title="Apri questo accordo"
+                        title={t('explore.openChord')}
                         onClick={() => {
                           setRootKey(noteKey(r.chord.root));
                           setTypeId(r.chord.type.id);

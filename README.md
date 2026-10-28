@@ -11,6 +11,7 @@ Web app locale per imparare gli accordi jazz al pianoforte: settime, none, undic
   - senza MIDI puoi selezionare le note cliccando la tastiera, oppure rivelare la soluzione e autovalutarti;
   - il *ripasso intelligente* ripropone più spesso gli accordi che sbagli.
 - **Statistiche** per tipo di accordo: precisione al primo colpo, tempo medio e serie record.
+- Interfaccia in inglese (default) e italiano, con menu lingua in alto a destra.
 - Spelling enarmonico corretto (es. B♭♭ in G♭°7, E♯ in Bmaj7♯11), notazione anglosassone con opzione Do Re Mi.
 
 Nessun backend, login o database: impostazioni e statistiche restano nel `localStorage` del browser.
