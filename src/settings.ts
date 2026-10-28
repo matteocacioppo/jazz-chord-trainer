@@ -3,7 +3,7 @@ import type { CategoryId } from './theory/chords';
 import { noteKey, ROOTS } from './theory/notes';
 import type { VoicingStyle } from './theory/voicing';
 
-export type PromptMode = 'symbol' | 'staff' | 'both';
+export type PromptMode = 'symbol' | 'staff';
 
 export interface QuizSettings {
   categories: CategoryId[];

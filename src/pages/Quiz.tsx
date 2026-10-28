@@ -9,7 +9,7 @@ import { generateChord } from '../quiz';
 import type { PromptMode, QuizSettings, Settings, Stats } from '../settings';
 import { checkChord, type CheckResult } from '../theory/check';
 import { CATEGORIES, chordSymbol, chordTones, type Chord } from '../theory/chords';
-import { mod, noteKey, noteName, ROOTS, spellPc } from '../theory/notes';
+import { midiName, mod, noteKey, noteName, ROOTS, spellPc } from '../theory/notes';
 import { VOICING_LABELS, voiceChord, type VoicingStyle } from '../theory/voicing';
 
 interface Props {
@@ -100,7 +100,10 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
     gesture.current.clear();
   };
 
-  const reveal = () => setPhase('revealed');
+  const reveal = () => {
+    if (selection.length && !played.length) setPlayed([...selection].sort((a, b) => a - b));
+    setPhase('revealed');
+  };
   const listen = () => playChord(voicingMidis);
 
   // Verifica live dal MIDI: corretto appena le note tenute formano l'accordo,
@@ -138,15 +141,25 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
         if (phase === 'asking') reveal();
         else next();
       } else if (e.key.toLowerCase() === 'a') listen();
+      else if (phase === 'asking' && e.key === 'Backspace') updateSelection((s) => s.slice(0, -1));
+      else if (phase === 'asking' && e.key === 'Escape') updateSelection(() => []);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   });
 
+  /** La selezione resta in ordine di click (per "Annulla"); cambiarla cancella i segni della verifica precedente. */
+  const updateSelection = (fn: (s: number[]) => number[]) => {
+    setSelection(fn);
+    setPlayed([]);
+  };
+
   const onKeyDown = (m: number) => {
     onPlayNote(m);
-    if (phase === 'asking') setSelection((s) => (s.includes(m) ? s.filter((x) => x !== m) : [...s, m].sort((a, b) => a - b)));
+    if (phase === 'asking') updateSelection((s) => (s.includes(m) ? s.filter((x) => x !== m) : [...s, m]));
   };
+
+  const sortedSelection = [...selection].sort((a, b) => a - b);
 
   // --- marcature tastiera ---
   const chordPcs = new Set(tones.map((t) => t.pc));
@@ -164,8 +177,8 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   }
 
   const revealed = phase !== 'asking';
-  const showSymbol = revealed || q.prompt !== 'staff';
-  const showStaff = revealed || q.prompt !== 'symbol';
+  const showSymbol = revealed || q.prompt !== 'staff'; // anche per il vecchio valore salvato 'both'
+  const showStaff = revealed || q.prompt === 'staff';
   const accuracy = session.total ? Math.round((session.correct / session.total) * 100) : 0;
   const midiReady = midi.status === 'ready' && midi.inputs.length > 0;
 
@@ -206,7 +219,7 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
             {phase === 'asking' ? (
               <>
                 {selection.length > 0 && (
-                  <button className="btn primary" onClick={() => evaluate(selection, true)}>
+                  <button className="btn primary" onClick={() => evaluate(sortedSelection, true)}>
                     {t('quiz.verify')}
                   </button>
                 )}
@@ -244,6 +257,24 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
 
         <div className="card">
           <Keyboard marks={marks} onKeyDown={onKeyDown} />
+          {phase === 'asking' && selection.length > 0 && (
+            <div className="selection-bar">
+              <span className="muted small">{t('quiz.selected')}</span>
+              {sortedSelection.map((m) => (
+                <button key={m} className="sel-chip" title={t('quiz.removeNote')} onClick={() => updateSelection((s) => s.filter((x) => x !== m))}>
+                  {midiName(m, italian)} <span aria-hidden>×</span>
+                </button>
+              ))}
+              <span className="sel-actions">
+                <button className="btn ghost small" onClick={() => updateSelection((s) => s.slice(0, -1))}>
+                  {t('quiz.undo')} <kbd>⌫</kbd>
+                </button>
+                <button className="btn ghost small" onClick={() => updateSelection(() => [])}>
+                  {t('quiz.clear')} <kbd>Esc</kbd>
+                </button>
+              </span>
+            </div>
+          )}
           {revealed ? (
             <Legend />
           ) : (
@@ -311,7 +342,6 @@ function Status(props: {
 const PROMPTS: { id: PromptMode; label: I18nKey }[] = [
   { id: 'symbol', label: 'settings.symbol' },
   { id: 'staff', label: 'settings.staff' },
-  { id: 'both', label: 'settings.both' },
 ];
 
 const WHITE_ROOTS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];

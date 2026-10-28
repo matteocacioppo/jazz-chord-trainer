@@ -343,3 +343,19 @@ button.pill:hover { border-color: var(--border-strong); }
 .lang-list button:hover { background: rgba(255, 255, 255, 0.06); }
 .lang-list button.active { color: #fff; }
 .lang-list .check { margin-left: auto; color: var(--accent-2); }
+
+/* ---------- quiz: selezione note ---------- */
+
+.selection-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.sel-chip {
+  border: 1px solid rgba(124, 92, 255, 0.6);
+  background: rgba(124, 92, 255, 0.16);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 13px; font-weight: 600;
+}
+.sel-chip span { opacity: 0.6; margin-left: 2px; }
+.sel-chip:hover { border-color: var(--bad); background: rgba(251, 97, 133, 0.14); }
+.sel-chip:hover span { opacity: 1; }
+.sel-actions { margin-left: auto; display: flex; gap: 8px; }
+.btn.small { padding: 6px 10px; font-size: 13px; }
