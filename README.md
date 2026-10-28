@@ -1,48 +1,50 @@
 # 🎹 Jazz Chord Trainer
 
-**Prova l'app online: https://matteocacioppo.github.io/jazz-chord-trainer/**
+**Try it online: https://matteocacioppo.github.io/jazz-chord-trainer/**
 
-Web app locale per imparare gli accordi jazz al pianoforte: settime, none, undicesime, tredicesime, dominanti alterati e combinazioni di tensioni.
+A web app for learning jazz piano chords: sevenths, ninths, elevenths, thirteenths, altered dominants and mixed tension combinations.
 
-## Funzionalità
+## Features
 
-- **Esplora**: scegli la fondamentale e il tipo di accordo, poi guardalo sulla tastiera con i gradi colorati (fondamentale, note guida, quinta, tensioni) e sul grande rigo, e ascoltalo con un piano campionato (Salamander Grand Piano).
-- **Riconoscimento MIDI**: suona un accordo sulla tastiera MIDI e l'app ti dice quale è, anche se è rootless.
-- **Quiz**: l'app propone un accordo (come sigla oppure sullo spartito) e tu lo suoni.
-  - con il MIDI la verifica è automatica, con voicing libero, quinta opzionale e, se vuoi, anche la fondamentale;
-  - senza MIDI puoi selezionare le note cliccando la tastiera, oppure suonare al piano e rivelare la soluzione;
-  - il *ripasso intelligente* ripropone più spesso gli accordi che sbagli.
-- **Statistiche** per tipo di accordo: precisione al primo colpo, tempo medio e serie record.
-- Interfaccia in inglese (default) e italiano, con menu lingua in alto a destra.
-- Spelling enarmonico corretto (es. B♭♭ in G♭°7, E♯ in Bmaj7♯11), notazione anglosassone con opzione Do Re Mi.
+- **Explore**: pick a root and a chord type, then see it on the keyboard with color-coded degrees (root, guide tones, fifth, tensions) and on the grand staff, and hear it played on a sampled piano (Salamander Grand Piano).
+- **MIDI recognition**: play a chord on your MIDI keyboard and the app tells you what it is, rootless voicings included.
+- **Quiz**: the app shows a chord (as a symbol or on the staff) and you play it.
+  - with MIDI, answers are checked automatically: any voicing works, the fifth is optional and, if you like, so is the root;
+  - without MIDI, click the on-screen keys to select notes, or play it on your piano and reveal the solution;
+  - browse the chords you've already played with the session history;
+  - *smart review* brings back the chords you miss more often.
+- **Stats** per chord type: first-try accuracy, average time and best streak.
+- English (default) and Italian interface, with a language menu in the top right.
+- Correct enharmonic spelling (e.g. B♭♭ in G♭°7, E♯ in Bmaj7♯11), letter-name notation with an optional Do Re Mi mode.
 
-Nessun backend, login o database: impostazioni e statistiche restano nel `localStorage` del browser.
+No backend, login or database: settings and stats are stored in your browser's `localStorage`.
 
-## Avvio
+## Getting started
 
-Serve [Node.js](https://nodejs.org/) 20 o superiore.
+Requires [Node.js](https://nodejs.org/) 20 or later.
 
 ```bash
 npm install
-npm run dev      # apre http://localhost:5173
-npm test         # test della teoria musicale
-npm run build    # build di produzione in dist/
-npm run deploy   # test + build + pubblicazione su GitHub Pages
+npm run dev      # opens http://localhost:5173
+npm test         # music theory tests
+npm run build    # production build in dist/
+npm run deploy   # test + build + publish to GitHub Pages
 ```
 
-**MIDI**: usa Chrome o Edge (Firefox e Safari non supportano la Web MIDI API). Collega la tastiera e consenti l'accesso quando il browser lo chiede. Se il controller non ha altoparlanti, attiva "Suono MIDI" in alto per sentirlo tramite il piano dell'app.
+**MIDI**: use Chrome or Edge (Firefox and Safari don't support the Web MIDI API). Connect your keyboard and allow access when the browser asks. If your controller has no built-in speakers, turn on "MIDI sound" at the top to hear it through the app's piano.
 
-**Scorciatoie nel quiz**: `Invio`/`Spazio` per rivelare o passare al prossimo, `←`/`→` per rivedere gli accordi precedenti, `A` per ascoltare, `Backspace` per togliere l'ultima nota selezionata, `Esc` per cancellarle tutte.
+**Quiz shortcuts**: `Enter`/`Space` to reveal or go to the next chord, `←`/`→` to review previous chords, `A` to listen, `Backspace` to remove the last selected note, `Esc` to clear them all.
 
-## Struttura
+## Project structure
 
 ```
 src/
-  theory/      note, intervalli, accordi, voicing, verifica e riconoscimento (+ test)
-  audio/       piano campionato (Tone.js)
-  midi/        hook Web MIDI
-  components/  tastiera SVG, grande rigo (VexFlow), chip dei gradi
-  pages/       Esplora, Quiz, Statistiche
+  theory/      notes, intervals, chords, voicings, checking and recognition (+ tests)
+  audio/       sampled piano (Tone.js)
+  midi/        Web MIDI hook
+  components/  SVG keyboard, grand staff (VexFlow), degree chips, language menu
+  pages/       Explore, Quiz, Stats
+  i18n.tsx     English and Italian UI strings
 ```
 
-Per aggiungere un accordo basta una riga in `src/theory/chords.ts`, ad esempio `def('id', 'sigla', 'Nome', 'categoria', '1 3 5? b7 9')`, dove `?` indica una nota opzionale.
+Adding a chord takes one line in `src/theory/chords.ts`, e.g. `def('id', 'symbol', 'English name', 'Italian name', 'category', '1 3 5? b7 9')`, where `?` marks an optional note.
