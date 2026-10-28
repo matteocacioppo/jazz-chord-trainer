@@ -1,7 +1,5 @@
 # 🎹 Jazz Chord Trainer
 
-**Try it online: https://matteocacioppo.github.io/jazz-chord-trainer/**
-
 A web app for learning jazz piano chords: sevenths, ninths, elevenths, thirteenths, altered dominants and mixed tension combinations.
 
 ## Features
