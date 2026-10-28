@@ -6,7 +6,7 @@ Web app locale per imparare gli accordi jazz al pianoforte: settime, none, undic
 
 - **Esplora**: scegli la fondamentale e il tipo di accordo, poi guardalo sulla tastiera con i gradi colorati (fondamentale, note guida, quinta, tensioni) e sul grande rigo, e ascoltalo con un piano campionato (Salamander Grand Piano).
 - **Riconoscimento MIDI**: suona un accordo sulla tastiera MIDI e l'app ti dice quale è, anche se è rootless.
-- **Quiz**: l'app propone un accordo (sigla, spartito o entrambi) e tu lo suoni.
+- **Quiz**: l'app propone un accordo (come sigla oppure sullo spartito) e tu lo suoni.
   - con il MIDI la verifica è automatica, con voicing libero, quinta opzionale e, se vuoi, anche la fondamentale;
   - senza MIDI puoi selezionare le note cliccando la tastiera, oppure rivelare la soluzione e autovalutarti;
   - il *ripasso intelligente* ripropone più spesso gli accordi che sbagli.
@@ -29,7 +29,7 @@ npm run build    # build di produzione in dist/
 
 **MIDI**: usa Chrome o Edge (Firefox e Safari non supportano la Web MIDI API). Collega la tastiera e consenti l'accesso quando il browser lo chiede. Se il controller non ha altoparlanti, attiva "Suono MIDI" in alto per sentirlo tramite il piano dell'app.
 
-**Scorciatoie nel quiz**: `Invio`/`Spazio` per rivelare o passare al prossimo, `A` per ascoltare.
+**Scorciatoie nel quiz**: `Invio`/`Spazio` per rivelare o passare al prossimo, `A` per ascoltare, `Backspace` per togliere l'ultima nota selezionata, `Esc` per cancellarle tutte.
 
 ## Struttura
 
