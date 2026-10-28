@@ -38,8 +38,6 @@ const en = {
 
   'quiz.verify': '✓ Check selection',
   'quiz.reveal': 'Reveal',
-  'quiz.selfRight': 'I played it right',
-  'quiz.selfWrong': 'Wrong',
   'quiz.next': 'Next',
   'quiz.listen': '▶ Listen',
   'quiz.skip': 'Skip',
@@ -143,8 +141,6 @@ const it: Record<I18nKey, string> = {
 
   'quiz.verify': '✓ Verifica selezione',
   'quiz.reveal': 'Rivela',
-  'quiz.selfRight': 'L’ho suonato giusto',
-  'quiz.selfWrong': 'Sbagliato',
   'quiz.next': 'Prossimo',
   'quiz.listen': '▶ Ascolta',
   'quiz.skip': 'Salta',

@@ -49,7 +49,6 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   const [hint, setHint] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [session, setSession] = useState({ total: 0, correct: 0, streak: 0 });
-  const [outcome, setOutcome] = useState<Outcome>('pending');
   const outcomeRef = useRef<Outcome>('pending');
   const gesture = useRef(new Set<number>());
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -67,7 +66,6 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   const record = (ok: boolean) => {
     if (outcomeRef.current !== 'pending') return;
     outcomeRef.current = ok ? 'correct' : 'wrong';
-    setOutcome(outcomeRef.current);
     const { type } = round.chord;
     const ms = Date.now() - round.started;
     if (ok) setElapsed(ms);
@@ -114,7 +112,6 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
     setSelection([]);
     setHint(false);
     outcomeRef.current = 'pending';
-    setOutcome('pending');
     gesture.current.clear();
   };
 
@@ -292,21 +289,9 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
                 </button>
               </>
             ) : (
-              <>
-                {outcome === 'pending' && (
-                  <>
-                    <button className="btn ok" onClick={() => record(true)}>
-                      {t('quiz.selfRight')}
-                    </button>
-                    <button className="btn bad" onClick={() => record(false)}>
-                      {t('quiz.selfWrong')}
-                    </button>
-                  </>
-                )}
-                <button className="btn primary" onClick={next}>
-                  {t('quiz.next')} <kbd>{t('quiz.kbdEnter')}</kbd>
-                </button>
-              </>
+              <button className="btn primary" onClick={next}>
+                {t('quiz.next')} <kbd>{t('quiz.kbdEnter')}</kbd>
+              </button>
             )}
             <button className="btn" onClick={listen}>
               {t('quiz.listen')} <kbd>A</kbd>

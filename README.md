@@ -8,7 +8,7 @@ Web app locale per imparare gli accordi jazz al pianoforte: settime, none, undic
 - **Riconoscimento MIDI**: suona un accordo sulla tastiera MIDI e l'app ti dice quale è, anche se è rootless.
 - **Quiz**: l'app propone un accordo (come sigla oppure sullo spartito) e tu lo suoni.
   - con il MIDI la verifica è automatica, con voicing libero, quinta opzionale e, se vuoi, anche la fondamentale;
-  - senza MIDI puoi selezionare le note cliccando la tastiera, oppure rivelare la soluzione e autovalutarti;
+  - senza MIDI puoi selezionare le note cliccando la tastiera, oppure suonare al piano e rivelare la soluzione;
   - il *ripasso intelligente* ripropone più spesso gli accordi che sbagli.
 - **Statistiche** per tipo di accordo: precisione al primo colpo, tempo medio e serie record.
 - Interfaccia in inglese (default) e italiano, con menu lingua in alto a destra.
