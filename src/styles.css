@@ -359,3 +359,27 @@ button.pill:hover { border-color: var(--border-strong); }
 .sel-chip:hover span { opacity: 1; }
 .sel-actions { margin-left: auto; display: flex; gap: 8px; }
 .btn.small { padding: 6px 10px; font-size: 13px; }
+
+/* ---------- quiz: cronologia ---------- */
+
+.history-nav {
+  position: absolute; top: 14px; left: 16px; z-index: 1;
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600;
+}
+.history-nav .reviewing { color: var(--accent-2); }
+.icon-btn {
+  width: 28px; height: 28px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-strong); background: var(--card-2);
+  border-radius: 8px; font-size: 18px; line-height: 1;
+}
+.icon-btn:hover:not(:disabled) { border-color: var(--accent); }
+.icon-btn:disabled { opacity: 0.35; cursor: default; }
+.prompt.review::before { background: radial-gradient(600px 220px at 50% 0%, rgba(34, 211, 238, 0.12), transparent 70%); }
+.prompt.review.correct::before { background: radial-gradient(600px 220px at 50% 0%, rgba(52, 211, 153, 0.16), transparent 70%); }
+.prompt.review.wrong::before { background: radial-gradient(600px 220px at 50% 0%, rgba(251, 97, 133, 0.14), transparent 70%); }
+.prompt .prompt-body { margin-top: 18px; }
+.sel-chip.static { cursor: default; }
+.sel-chip.ok, .sel-chip.ok:hover { border-color: rgba(52, 211, 153, 0.6); background: rgba(52, 211, 153, 0.14); }
+.sel-chip.bad, .sel-chip.bad:hover { border-color: rgba(251, 97, 133, 0.6); background: rgba(251, 97, 133, 0.14); }

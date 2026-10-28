@@ -29,7 +29,7 @@ npm run build    # build di produzione in dist/
 
 **MIDI**: usa Chrome o Edge (Firefox e Safari non supportano la Web MIDI API). Collega la tastiera e consenti l'accesso quando il browser lo chiede. Se il controller non ha altoparlanti, attiva "Suono MIDI" in alto per sentirlo tramite il piano dell'app.
 
-**Scorciatoie nel quiz**: `Invio`/`Spazio` per rivelare o passare al prossimo, `A` per ascoltare, `Backspace` per togliere l'ultima nota selezionata, `Esc` per cancellarle tutte.
+**Scorciatoie nel quiz**: `Invio`/`Spazio` per rivelare o passare al prossimo, `←`/`→` per rivedere gli accordi precedenti, `A` per ascoltare, `Backspace` per togliere l'ultima nota selezionata, `Esc` per cancellarle tutte.
 
 ## Struttura
 

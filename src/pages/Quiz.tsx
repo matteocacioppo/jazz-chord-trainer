@@ -24,6 +24,16 @@ interface Props {
 type Phase = 'asking' | 'correct' | 'revealed';
 type Outcome = 'pending' | 'correct' | 'wrong';
 
+/** Accordo già passato, rivedibile dalla cronologia della sessione. */
+interface HistoryItem {
+  chord: Chord;
+  played: number[];
+  outcome: Outcome;
+  elapsed: number;
+}
+
+const HISTORY_MAX = 100;
+
 export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote }: Props) {
   const q = settings.quiz;
   const { italian } = settings;
@@ -42,9 +52,14 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   const [outcome, setOutcome] = useState<Outcome>('pending');
   const outcomeRef = useRef<Outcome>('pending');
   const gesture = useRef(new Set<number>());
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [reviewIdx, setReviewIdx] = useState<number | null>(null);
+  const reviewing = reviewIdx !== null ? history[reviewIdx] : null;
 
-  const voicing = useMemo(() => voiceChord(round.chord, settings.voicing), [round.chord, settings.voicing]);
-  const tones = useMemo(() => chordTones(round.chord), [round.chord]);
+  // Accordo mostrato: quello corrente, oppure quello che si sta rivedendo.
+  const viewChord = reviewing?.chord ?? round.chord;
+  const voicing = useMemo(() => voiceChord(viewChord, settings.voicing), [viewChord, settings.voicing]);
+  const tones = useMemo(() => chordTones(viewChord), [viewChord]);
   const voicingMidis = voicing.map((n) => n.midi);
 
   const updateQuiz = (patch: Partial<QuizSettings>) => setSettings((s) => ({ ...s, quiz: { ...s.quiz, ...patch } }));
@@ -89,6 +104,9 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   };
 
   const next = () => {
+    const notes = played.length ? played : [...selection].sort((a, b) => a - b);
+    setHistory((h) => [...h, { chord: round.chord, played: notes, outcome: outcomeRef.current, elapsed }].slice(-HISTORY_MAX));
+    setElapsed(0);
     setRound((r) => ({ chord: generateChord(q, stats, r.chord), started: Date.now() }));
     setPhase('asking');
     setFeedback(null);
@@ -106,9 +124,14 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   };
   const listen = () => playChord(voicingMidis);
 
+  const goBack = () => history.length && setReviewIdx((i) => (i === null ? history.length - 1 : Math.max(0, i - 1)));
+  const goForward = () => setReviewIdx((i) => (i === null || i + 1 >= history.length ? null : i + 1));
+  const backToQuiz = () => setReviewIdx(null);
+
   // Verifica live dal MIDI: corretto appena le note tenute formano l'accordo,
   // sbagliato solo quando rilasci tutto senza averlo mai centrato.
   useEffect(() => {
+    if (reviewing) return;
     if (phase !== 'asking') {
       if (!midi.active.length) gesture.current.clear();
       return;
@@ -128,15 +151,22 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   }, [session.streak]);
 
   useEffect(() => {
-    if (phase !== 'correct' || !q.autoAdvance) return;
+    if (phase !== 'correct' || !q.autoAdvance || reviewing) return;
     const t = setTimeout(next, 1600);
     return () => clearTimeout(t);
-  }, [phase, round]);
+  }, [phase, round, reviewing]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.repeat) return;
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === 'ArrowLeft') goBack();
+      else if (e.key === 'ArrowRight') goForward();
+      else if (reviewing) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') {
+          e.preventDefault();
+          backToQuiz();
+        } else if (e.key.toLowerCase() === 'a') listen();
+      } else if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         if (phase === 'asking') reveal();
         else next();
@@ -156,7 +186,7 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
 
   const onKeyDown = (m: number) => {
     onPlayNote(m);
-    if (phase === 'asking') updateSelection((s) => (s.includes(m) ? s.filter((x) => x !== m) : [...s, m]));
+    if (phase === 'asking' && !reviewing) updateSelection((s) => (s.includes(m) ? s.filter((x) => x !== m) : [...s, m]));
   };
 
   const sortedSelection = [...selection].sort((a, b) => a - b);
@@ -167,7 +197,10 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
   const markPlayed = (m: number) => {
     marks[m] = chordPcs.has(mod(m, 12)) ? { ...marks[m], dot: 'var(--ok)' } : { fill: 'var(--bad)', label: '✗', dot: undefined };
   };
-  if (phase === 'asking') {
+  if (reviewing) {
+    marks = voicingMarks(voicing, italian);
+    reviewing.played.forEach(markPlayed);
+  } else if (phase === 'asking') {
     if (feedback) played.forEach(markPlayed);
     for (const m of selection) marks[m] = { ...marks[m], fill: 'var(--select)' };
     for (const m of midi.active) marks[m] = { ...marks[m], fill: 'var(--played)' };
@@ -176,23 +209,38 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
     new Set([...played, ...midi.active]).forEach(markPlayed);
   }
 
-  const revealed = phase !== 'asking';
-  const showSymbol = revealed || q.prompt !== 'staff'; // anche per il vecchio valore salvato 'both'
-  const showStaff = revealed || q.prompt === 'staff';
+  const revealed = reviewing !== null || phase !== 'asking';
+  const asking = !reviewing && phase === 'asking';
+  // Sempre e solo la modalità scelta in "Mostra", anche dopo la soluzione e nella cronologia.
+  const showStaff = q.prompt === 'staff';
+  const showSymbol = !showStaff; // anche per il vecchio valore salvato 'both'
   const accuracy = session.total ? Math.round((session.correct / session.total) * 100) : 0;
   const midiReady = midi.status === 'ready' && midi.inputs.length > 0;
 
   return (
     <div className="quiz">
       <section className="main-col">
-        <div className={`card prompt ${phase}`}>
+        <div className={`card prompt ${reviewing ? `review ${reviewing.outcome}` : phase}`}>
+          {history.length > 0 && (
+            <div className="history-nav">
+              <button className="icon-btn" onClick={goBack} disabled={reviewIdx === 0} title={`${t('history.prev')} (←)`}>
+                ‹
+              </button>
+              <span className={reviewing ? 'reviewing' : 'muted'}>
+                {reviewing ? t('history.position', { n: reviewIdx! + 1, total: history.length }) : t('history.current')}
+              </span>
+              <button className="icon-btn" onClick={goForward} disabled={!reviewing} title={`${t('history.next')} (→)`}>
+                ›
+              </button>
+            </div>
+          )}
           <div className="prompt-body">
             {showSymbol && (
               <div className="prompt-symbol">
-                <div className="symbol xl">{chordSymbol(round.chord, italian)}</div>
+                <div className="symbol xl">{chordSymbol(viewChord, italian)}</div>
                 <ChordSubtitle
-                  name={round.chord.type.name[lang]}
-                  solfege={lang === 'it' && !italian ? chordSymbol(round.chord, true) : undefined}
+                  name={viewChord.type.name[lang]}
+                  solfege={lang === 'it' && !italian ? chordSymbol(viewChord, true) : undefined}
                 />
               </div>
             )}
@@ -203,20 +251,36 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
             )}
           </div>
 
-          <Status
-            phase={phase}
-            feedback={feedback}
-            elapsed={elapsed}
-            hint={hint}
-            onHint={() => setHint(true)}
-            italian={italian}
-            midiReady={midiReady}
-          />
+          {reviewing ? (
+            <ReviewStatus item={reviewing} />
+          ) : (
+            <Status
+              phase={phase}
+              feedback={feedback}
+              elapsed={elapsed}
+              hint={hint}
+              onHint={() => setHint(true)}
+              italian={italian}
+              midiReady={midiReady}
+            />
+          )}
 
           {revealed && <ToneChips tones={tones} italian={italian} />}
 
           <div className="actions center">
-            {phase === 'asking' ? (
+            {reviewing ? (
+              <>
+                <button className="btn" onClick={goBack} disabled={reviewIdx === 0}>
+                  ‹ {t('history.prev')}
+                </button>
+                <button className="btn" onClick={goForward}>
+                  {t('history.next')} ›
+                </button>
+                <button className="btn primary" onClick={backToQuiz}>
+                  {t('history.back')} <kbd>{t('quiz.kbdEnter')}</kbd>
+                </button>
+              </>
+            ) : phase === 'asking' ? (
               <>
                 {selection.length > 0 && (
                   <button className="btn primary" onClick={() => evaluate(sortedSelection, true)}>
@@ -247,7 +311,7 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
             <button className="btn" onClick={listen}>
               {t('quiz.listen')} <kbd>A</kbd>
             </button>
-            {phase === 'asking' && (
+            {asking && (
               <button className="btn ghost" onClick={next}>
                 {t('quiz.skip')}
               </button>
@@ -257,7 +321,21 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
 
         <div className="card">
           <Keyboard marks={marks} onKeyDown={onKeyDown} />
-          {phase === 'asking' && selection.length > 0 && (
+          {reviewing && (
+            <div className="selection-bar">
+              <span className="muted small">{t('history.yourNotes')}</span>
+              {reviewing.played.length ? (
+                reviewing.played.map((m) => (
+                  <span key={m} className={`sel-chip static${tones.some((tone) => tone.pc === mod(m, 12)) ? ' ok' : ' bad'}`}>
+                    {midiName(m, italian)}
+                  </span>
+                ))
+              ) : (
+                <span className="muted small">{t('history.noNotes')}</span>
+              )}
+            </div>
+          )}
+          {asking && selection.length > 0 && (
             <div className="selection-bar">
               <span className="muted small">{t('quiz.selected')}</span>
               {sortedSelection.map((m) => (
@@ -306,6 +384,18 @@ export function Quiz({ settings, setSettings, stats, setStats, midi, onPlayNote 
       </aside>
     </div>
   );
+}
+
+function ReviewStatus({ item }: { item: HistoryItem }) {
+  const { t } = useT();
+  if (item.outcome === 'correct')
+    return (
+      <div className="status ok">
+        {t('history.correct')} {item.elapsed > 0 && <span className="muted">{(item.elapsed / 1000).toFixed(1)} s</span>}
+      </div>
+    );
+  if (item.outcome === 'wrong') return <div className="status bad">{t('history.wrong')}</div>;
+  return <div className="status muted">{t('history.skipped')}</div>;
 }
 
 function Status(props: {
