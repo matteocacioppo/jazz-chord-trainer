@@ -1,5 +1,7 @@
 # 🎹 Jazz Chord Trainer
 
+**Prova l'app online: https://matteocacioppo.github.io/jazz-chord-trainer/**
+
 Web app locale per imparare gli accordi jazz al pianoforte: settime, none, undicesime, tredicesime, dominanti alterati e combinazioni di tensioni.
 
 ## Funzionalità
@@ -25,6 +27,7 @@ npm install
 npm run dev      # apre http://localhost:5173
 npm test         # test della teoria musicale
 npm run build    # build di produzione in dist/
+npm run deploy   # test + build + pubblicazione su GitHub Pages
 ```
 
 **MIDI**: usa Chrome o Edge (Firefox e Safari non supportano la Web MIDI API). Collega la tastiera e consenti l'accesso quando il browser lo chiede. Se il controller non ha altoparlanti, attiva "Suono MIDI" in alto per sentirlo tramite il piano dell'app.
