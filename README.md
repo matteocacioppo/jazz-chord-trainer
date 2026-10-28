@@ -2,6 +2,8 @@
 
 A web app for learning jazz piano chords: sevenths, ninths, elevenths, thirteenths, altered dominants and mixed tension combinations.
 
+![Jazz Chord Trainer – Explore page](docs/screenshot.png)
+
 ## Features
 
 - **Explore**: pick a root and a chord type, then see it on the keyboard with color-coded degrees (root, guide tones, fifth, tensions) and on the grand staff, and hear it played on a sampled piano (Salamander Grand Piano).
