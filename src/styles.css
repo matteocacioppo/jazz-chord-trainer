@@ -250,6 +250,7 @@ button.pill:hover { border-color: var(--border-strong); }
 /* ---------- staff ---------- */
 
 .paper-card {
+  overflow: hidden;
   background: #fbf8f1;
   border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
@@ -257,7 +258,7 @@ button.pill:hover { border-color: var(--border-strong); }
 }
 .card.paper-card { padding: 12px; }
 .paper-card.inset { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3); }
-.staff { width: 100%; max-width: 320px; }
+.staff { width: 100%; max-width: 320px; min-width: 0; }
 .staff svg { display: block; width: 100%; height: auto; }
 
 /* ---------- quiz ---------- */

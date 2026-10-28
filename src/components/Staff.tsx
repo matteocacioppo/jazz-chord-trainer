@@ -58,10 +58,17 @@ export function Staff({ notes }: { notes: VoicedNote[] }) {
       parts.forEach(([v, stave]) => v.draw(ctx, stave));
     }
 
+    // VexFlow fissa le dimensioni in px (attributi + stile inline): le togliamo così l'SVG
+    // scala col viewBox e resta dentro il riquadro.
+    el.style.removeProperty('width');
     const svg = el.querySelector('svg');
-    svg?.setAttribute('viewBox', `0 0 ${W} ${H}`);
-    svg?.removeAttribute('width');
-    svg?.removeAttribute('height');
+    if (svg) {
+      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      svg.removeAttribute('width');
+      svg.removeAttribute('height');
+      svg.style.removeProperty('width');
+      svg.style.removeProperty('height');
+    }
   }, [notes]);
 
   return <div className="staff" ref={ref} aria-label={t('aria.staff')} />;
