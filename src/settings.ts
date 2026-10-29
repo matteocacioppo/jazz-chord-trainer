@@ -1,4 +1,5 @@
 import type { Lang, Localized } from './i18n';
+import type { ClefMode, Hands, Level } from './reading/exercise';
 import type { CategoryId } from './theory/chords';
 import { noteKey, ROOTS } from './theory/notes';
 import type { VoicingStyle } from './theory/voicing';
@@ -14,12 +15,23 @@ export interface QuizSettings {
   smart: boolean;
 }
 
+export interface ReadingSettings {
+  clef: ClefMode;
+  hands: Hands;
+  level: Level;
+  tempo: boolean;
+  bpm: number;
+  showNames: boolean;
+  anyOctave: boolean;
+}
+
 export interface Settings {
   lang: Lang;
   italian: boolean;
   voicing: VoicingStyle;
   midiEcho: boolean;
   quiz: QuizSettings;
+  reading: ReadingSettings;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -34,6 +46,15 @@ export const DEFAULT_SETTINGS: Settings = {
     rootOptional: true,
     autoAdvance: true,
     smart: true,
+  },
+  reading: {
+    clef: 'treble',
+    hands: 1,
+    level: 1,
+    tempo: false,
+    bpm: 60,
+    showNames: false,
+    anyOctave: false,
   },
 };
 

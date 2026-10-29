@@ -13,6 +13,11 @@ A web app for learning jazz piano chords: sevenths, ninths, elevenths, thirteent
   - without MIDI, click the on-screen keys to select notes, or play it on your piano and reveal the solution;
   - browse the chords you've already played with the session history;
   - *smart review* brings back the chords you miss more often.
+- **Reading**: sight-reading practice on simple four-bar exercises. Read the notes and play them on your keyboard; each note turns green, orange (corrected) or red (missed).
+  - treble clef, bass clef or both, with one or two hands;
+  - three levels: five-note position, the whole staff, ledger lines and accidentals;
+  - free mode (the exercise waits for the right note) or with tempo (metronome, count-in and adjustable BPM);
+  - optional note names under the staff, and an "any octave" option for small keyboards.
 - **Stats** per chord type: first-try accuracy, average time and best streak.
 - English (default) and Italian interface, with a language menu in the top right.
 - Correct enharmonic spelling (e.g. B♭♭ in G♭°7, E♯ in Bmaj7♯11), letter-name notation with an optional Do Re Mi mode.
@@ -43,7 +48,8 @@ src/
   audio/       sampled piano (Tone.js)
   midi/        Web MIDI hook
   components/  SVG keyboard, grand staff (VexFlow), degree chips, language menu
-  pages/       Explore, Quiz, Stats
+  reading/     sight-reading exercises, checking and metronome (+ tests)
+  pages/       Explore, Quiz, Reading, Stats
   i18n.tsx     English and Italian UI strings
 ```
 

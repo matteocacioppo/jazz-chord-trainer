@@ -384,3 +384,21 @@ button.pill:hover { border-color: var(--border-strong); }
 .sel-chip.static { cursor: default; }
 .sel-chip.ok, .sel-chip.ok:hover { border-color: rgba(52, 211, 153, 0.6); background: rgba(52, 211, 153, 0.14); }
 .sel-chip.bad, .sel-chip.bad:hover { border-color: rgba(251, 97, 133, 0.6); background: rgba(251, 97, 133, 0.14); }
+
+/* ---------- lettura ---------- */
+
+.reading { display: grid; grid-template-columns: 1fr 340px; gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .reading { grid-template-columns: 1fr; } }
+.reading-card { display: flex; flex-direction: column; gap: 18px; }
+.score-paper { padding: 12px 16px; }
+.reading-score { width: 100%; }
+.reading-score svg { display: block; width: 100%; height: auto; }
+.status.count { color: var(--accent-2); font-size: 20px; }
+.results { box-shadow: none; background: var(--bg-2); border: 1px solid var(--border); border-radius: 14px; grid-template-columns: repeat(4, 1fr); }
+.c-ok { color: var(--ok); }
+.c-fixed { color: #f0a020; }
+.c-missed { color: var(--bad); }
+.settings small.muted { font-size: 12px; margin-top: -4px; }
+.segmented button:disabled { opacity: 0.4; cursor: default; }
+.range { display: flex; flex-direction: column; gap: 6px; font-size: 13px; margin-top: 4px; }
+.range input { accent-color: var(--accent); width: 100%; }

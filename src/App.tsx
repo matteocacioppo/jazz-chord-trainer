@@ -6,14 +6,16 @@ import { LangContext, useT, type I18nKey } from './i18n';
 import { useMidi, type MidiState } from './midi/useMidi';
 import { Explore } from './pages/Explore';
 import { Quiz, Switch } from './pages/Quiz';
+import { Reading } from './pages/Reading';
 import { StatsPage } from './pages/StatsPage';
 import { DEFAULT_SETTINGS, EMPTY_STATS, type Settings, type Stats } from './settings';
 
-type Page = 'explore' | 'quiz' | 'stats';
+type Page = 'explore' | 'quiz' | 'reading' | 'stats';
 
 const PAGES: { id: Page; label: I18nKey }[] = [
   { id: 'explore', label: 'nav.explore' },
   { id: 'quiz', label: 'nav.quiz' },
+  { id: 'reading', label: 'nav.reading' },
   { id: 'stats', label: 'nav.stats' },
 ];
 
@@ -93,6 +95,7 @@ function Shell({ settings, setSettings }: { settings: Settings; setSettings: (fn
         {page === 'quiz' && (
           <Quiz settings={settings} setSettings={setSettings} stats={stats} setStats={setStats} midi={midi} onPlayNote={playNote} />
         )}
+        {page === 'reading' && <Reading settings={settings} setSettings={setSettings} midi={midi} onPlayNote={playNote} />}
         {page === 'stats' && <StatsPage stats={stats} setStats={setStats} />}
       </main>
     </div>

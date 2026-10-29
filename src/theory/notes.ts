@@ -1,6 +1,6 @@
 export const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const;
 export const ITALIAN = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'] as const;
-const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
+export const LETTER_PC = [0, 2, 4, 5, 7, 9, 11];
 
 /** Nota "scritta": lettera (0 = C … 6 = B) + alterazione (-2 … +2). */
 export interface Note {
